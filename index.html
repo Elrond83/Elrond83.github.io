@@ -1,0 +1,132 @@
+<html>
+<head>
+<title>PropertySearcherImpl.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: #999999; font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,0); }
+.s1 { color: rgb(0,0,128); font-weight: bold; }
+.s2 { color: rgb(128,128,128); font-style: italic; }
+.s3 { color: rgb(128,128,128); font-weight: bold; font-style: italic; }
+.s4 { color: rgb(0,128,0); font-weight: bold; }
+.s5 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+PropertySearcherImpl.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0"> 
+<a name="l2511"><span class="ln">2511 </span></a>    </span><span class="s1">boolean </span><span class="s0">isIntermingledSort(Site site, WVRQuery query, SearchParams searchParams, List&lt;SearchHitComparator&gt; comparators, 
+<a name="l2512"><span class="ln">2512 </span></a>        </span><span class="s1">int </span><span class="s0">pageSize) { 
+<a name="l2513"><span class="ln">2513 </span></a> 
+<a name="l2514"><span class="ln">2514 </span></a>        </span><span class="s1">int </span><span class="s0">maxElasticSearchDocumentCount = getMaxElasticSearchDocuments(); 
+<a name="l2515"><span class="ln">2515 </span></a>        </span><span class="s1">if </span><span class="s0">(searchParams.getMaxElasticSearchDocumentsCount() != </span><span class="s1">null</span><span class="s0">) { 
+<a name="l2516"><span class="ln">2516 </span></a>            maxElasticSearchDocumentCount = searchParams.getMaxElasticSearchDocumentsCount(); 
+<a name="l2517"><span class="ln">2517 </span></a>        } 
+<a name="l2518"><span class="ln">2518 </span></a>        </span><span class="s1">return </span><span class="s0">(interminglingGovernance != </span><span class="s1">null</span><span class="s0"> 
+<a name="l2519"><span class="ln">2519 </span></a>            &amp;&amp; interminglingGovernance 
+<a name="l2520"><span class="ln">2520 </span></a>            .isIntermingledSort(site, query, searchParams, comparators, pageSize, maxElasticSearchDocumentCount)); 
+<a name="l2521"><span class="ln">2521 </span></a>    } 
+<a name="l2522"><span class="ln">2522 </span></a> 
+<a name="l2523"><span class="ln">2523 </span></a>    </span><span class="s1">private </span><span class="s0">List&lt;HitData&gt; getHitData(SearchResponse searchResponse, Site site, List&lt;SortBuilder&gt; esSorts, SearchParams searchParams) { 
+<a name="l2524"><span class="ln">2524 </span></a>        List&lt;HitData&gt; hitDataList = </span><span class="s1">new </span><span class="s0">ArrayList&lt;&gt;(); 
+<a name="l2525"><span class="ln">2525 </span></a>        </span><span class="s1">if </span><span class="s0">(searchResponse.getHits() != </span><span class="s1">null</span><span class="s0">) { 
+<a name="l2526"><span class="ln">2526 </span></a>            </span><span class="s1">for </span><span class="s0">(SearchHit searchHit : searchResponse.getHits().getHits()) { 
+<a name="l2527"><span class="ln">2527 </span></a>                HitData hitData = HitData.fromSearchHit(searchHit, site); 
+<a name="l2528"><span class="ln">2528 </span></a>                SortUtil.logFirstPassSortDetails(hitData, esSorts, searchParams.getVisitorUUID()); 
+<a name="l2529"><span class="ln">2529 </span></a>                hitDataList.add(hitData); 
+<a name="l2530"><span class="ln">2530 </span></a>            } 
+<a name="l2531"><span class="ln">2531 </span></a>        } 
+<a name="l2532"><span class="ln">2532 </span></a>        </span><span class="s1">return </span><span class="s0">hitDataList; 
+<a name="l2533"><span class="ln">2533 </span></a>    } 
+<a name="l2534"><span class="ln">2534 </span></a> 
+<a name="l2535"><span class="ln">2535 </span></a>    </span><span class="s2">/** 
+<a name="l2536"><span class="ln">2536 </span></a>     * Assembles the Hits element by taking all the fields from the provided {</span><span class="s3">@link </span><span class="s2">HitData} and shoving it into the result Hits. 
+<a name="l2537"><span class="ln">2537 </span></a>     */</span><span class="s0"> 
+<a name="l2538"><span class="ln">2538 </span></a>    </span><span class="s1">private void </span><span class="s0">assembleHits(Site site, SearchParams searchParams, SearchResults results, </span><span class="s1">boolean </span><span class="s0">showSortDetails, 
+<a name="l2539"><span class="ln">2539 </span></a>        PriceQuoteMap&lt;String, PriceQuote&gt; priceQuotesMap, List&lt;HitData&gt; hitData, </span><span class="s1">boolean </span><span class="s0">sponsoredPlacements, 
+<a name="l2540"><span class="ln">2540 </span></a>        List&lt;AssignedABTest&gt; assignedABTests, List&lt;AssignedABTest&gt; exposedABTests, Locale locale) { 
+<a name="l2541"><span class="ln">2541 </span></a> 
+<a name="l2542"><span class="ln">2542 </span></a>        StopWatch assembleHitsStopWatch = </span><span class="s1">new </span><span class="s0">Slf4JStopWatch(</span><span class="s4">&quot;PropertySearch.assembleHits&quot;</span><span class="s0">); 
+<a name="l2543"><span class="ln">2543 </span></a> 
+<a name="l2544"><span class="ln">2544 </span></a>        </span><span class="s2">// Build the Assemblers for each Hit</span><span class="s0"> 
+<a name="l2545"><span class="ln">2545 </span></a>        List&lt;HitAssembler&gt; hitAssemblers = hitData.stream() 
+<a name="l2546"><span class="ln">2546 </span></a>            .map(currentHit -&gt; </span><span class="s1">new </span><span class="s0">HitAssembler(currentHit, site, searchParams, showSortDetails, priceQuotesMap, sponsoredPlacements, 
+<a name="l2547"><span class="ln">2547 </span></a>                locale)) 
+<a name="l2548"><span class="ln">2548 </span></a>            .collect(Collectors.toList()); 
+<a name="l2549"><span class="ln">2549 </span></a> 
+<a name="l2550"><span class="ln">2550 </span></a>        List&lt;Hit&gt; hits; 
+<a name="l2551"><span class="ln">2551 </span></a>        </span><span class="s1">if </span><span class="s0">(parallelizeAssembleHits.isEnabled()) { 
+<a name="l2552"><span class="ln">2552 </span></a>            </span><span class="s2">// Run those Hit Assemblers in parallel</span><span class="s0"> 
+<a name="l2553"><span class="ln">2553 </span></a>            List&lt;Future&lt;Hit&gt;&gt; hitFutures; 
+<a name="l2554"><span class="ln">2554 </span></a>            </span><span class="s1">try </span><span class="s0">{ 
+<a name="l2555"><span class="ln">2555 </span></a>                hitFutures = hitAssemblerExecutorService.invokeAll(hitAssemblers); 
+<a name="l2556"><span class="ln">2556 </span></a>            } </span><span class="s1">catch </span><span class="s0">(InterruptedException e) { 
+<a name="l2557"><span class="ln">2557 </span></a>                </span><span class="s2">// This is all code that was already running without throwing exceptions, so this shouldn't actually occur</span><span class="s0"> 
+<a name="l2558"><span class="ln">2558 </span></a>                LOGGER.error(</span><span class="s4">&quot;Exception Assembing Hit&quot;</span><span class="s0">, e); 
+<a name="l2559"><span class="ln">2559 </span></a>                </span><span class="s1">throw new </span><span class="s0">RuntimeException(e); 
+<a name="l2560"><span class="ln">2560 </span></a>            } 
+<a name="l2561"><span class="ln">2561 </span></a>            hits = hitFutures.stream().map(future -&gt; { 
+<a name="l2562"><span class="ln">2562 </span></a>                </span><span class="s1">try </span><span class="s0">{ 
+<a name="l2563"><span class="ln">2563 </span></a>                    </span><span class="s1">return </span><span class="s0">future.get(); 
+<a name="l2564"><span class="ln">2564 </span></a>                } </span><span class="s1">catch </span><span class="s0">(ExecutionException | InterruptedException e) { 
+<a name="l2565"><span class="ln">2565 </span></a>                    </span><span class="s2">// This is all code that was already running without throwing exceptions, so this shouldn't actually occur</span><span class="s0"> 
+<a name="l2566"><span class="ln">2566 </span></a>                    LOGGER.error(</span><span class="s4">&quot;Exception Assembing Hit&quot;</span><span class="s0">, e); 
+<a name="l2567"><span class="ln">2567 </span></a>                    </span><span class="s1">throw new </span><span class="s0">RuntimeException(e); 
+<a name="l2568"><span class="ln">2568 </span></a>                } 
+<a name="l2569"><span class="ln">2569 </span></a>            }).filter(Objects::nonNull).collect(Collectors.toList()); 
+<a name="l2570"><span class="ln">2570 </span></a>        } </span><span class="s1">else </span><span class="s0">{ 
+<a name="l2571"><span class="ln">2571 </span></a>            </span><span class="s2">// Execute the assemblers serially</span><span class="s0"> 
+<a name="l2572"><span class="ln">2572 </span></a>            hits = hitAssemblers.stream().map(HitAssembler::call).filter(Objects::nonNull).collect(Collectors.toList()); 
+<a name="l2573"><span class="ln">2573 </span></a>        } 
+<a name="l2574"><span class="ln">2574 </span></a> 
+<a name="l2575"><span class="ln">2575 </span></a>        </span><span class="s2">// This is done here instead of in the hit assembler to minimize calls to the TermApi</span><span class="s0"> 
+<a name="l2576"><span class="ln">2576 </span></a>        buildAndSetHitGeographies(site, locale, hitData, hits, termApi, multiGBS); 
+<a name="l2577"><span class="ln">2577 </span></a> 
+<a name="l2578"><span class="ln">2578 </span></a>        results.setHits(hits); 
+<a name="l2579"><span class="ln">2579 </span></a>        assembleHitsStopWatch.stop(); 
+<a name="l2580"><span class="ln">2580 </span></a>    } 
+<a name="l2581"><span class="ln">2581 </span></a> 
+<a name="l2582"><span class="ln">2582 </span></a>    @Profiled 
+<a name="l2583"><span class="ln">2583 </span></a>    @VisibleForTesting 
+<a name="l2584"><span class="ln">2584 </span></a>    </span><span class="s1">static void </span><span class="s0">buildAndSetHitGeographies(Site site, Locale locale, List&lt;HitData&gt; hitDatas, List&lt;Hit&gt; hits, TermApi termApi, 
+<a name="l2585"><span class="ln">2585 </span></a>        MultiGBS multiGBS) { 
+<a name="l2586"><span class="ln">2586 </span></a>        Objects.requireNonNull(hitDatas); 
+<a name="l2587"><span class="ln">2587 </span></a>        Objects.requireNonNull(hits); 
+<a name="l2588"><span class="ln">2588 </span></a>        Objects.requireNonNull(termApi); 
+<a name="l2589"><span class="ln">2589 </span></a>        Objects.requireNonNull(multiGBS); 
+<a name="l2590"><span class="ln">2590 </span></a>        checkState(hitDatas.size() == hits.size()); </span><span class="s2">// We assume that there is a one to one mapping of hit datas to hits</span><span class="s0"> 
+<a name="l2591"><span class="ln">2591 </span></a> 
+<a name="l2592"><span class="ln">2592 </span></a>        </span><span class="s1">int </span><span class="s0">hitsSize = hits.size(); 
+<a name="l2593"><span class="ln">2593 </span></a>        Map&lt;Hit, UUID&gt; hitToBaseLocationUuidMap = </span><span class="s1">new </span><span class="s0">HashMap&lt;&gt;(hitsSize); 
+<a name="l2594"><span class="ln">2594 </span></a>        List&lt;UUID&gt; baseLocationUuids = </span><span class="s1">new </span><span class="s0">ArrayList&lt;&gt;(hitsSize); 
+<a name="l2595"><span class="ln">2595 </span></a>        </span><span class="s1">for </span><span class="s0">(</span><span class="s1">int </span><span class="s0">i = </span><span class="s5">0</span><span class="s0">; i &lt; hitsSize; i++) { 
+<a name="l2596"><span class="ln">2596 </span></a>            HitData hitData = hitDatas.get(i); 
+<a name="l2597"><span class="ln">2597 </span></a>            Optional&lt;UUID&gt; baseLocationUuidOpt = hitData.getBaseLocationUuid(); 
+<a name="l2598"><span class="ln">2598 </span></a>            </span><span class="s1">if </span><span class="s0">(baseLocationUuidOpt.isPresent()) { 
+<a name="l2599"><span class="ln">2599 </span></a>                UUID baseLocationUuid = baseLocationUuidOpt.get(); 
+<a name="l2600"><span class="ln">2600 </span></a>                baseLocationUuids.add(baseLocationUuid); 
+<a name="l2601"><span class="ln">2601 </span></a> 
+<a name="l2602"><span class="ln">2602 </span></a>                Hit hit = hits.get(i); 
+<a name="l2603"><span class="ln">2603 </span></a>                hitToBaseLocationUuidMap.put(hit, baseLocationUuid); 
+<a name="l2604"><span class="ln">2604 </span></a>            } 
+<a name="l2605"><span class="ln">2605 </span></a>        } 
+<a name="l2606"><span class="ln">2606 </span></a> 
+<a name="l2607"><span class="ln">2607 </span></a>        Map&lt;UUID, Term&gt; baseLocationUuidToTermMap = TermApiUtils.getTermsByUuids(termApi, baseLocationUuids); 
+<a name="l2608"><span class="ln">2608 </span></a>        </span><span class="s1">for </span><span class="s0">(Hit hit : hits) { 
+<a name="l2609"><span class="ln">2609 </span></a>            UUID baseLocationUuid = hitToBaseLocationUuidMap.get(hit); 
+<a name="l2610"><span class="ln">2610 </span></a>            </span><span class="s1">if </span><span class="s0">(baseLocationUuid != </span><span class="s1">null</span><span class="s0">) { 
+<a name="l2611"><span class="ln">2611 </span></a>                Term baseLocationTerm = baseLocationUuidToTermMap.get(baseLocationUuid); 
+<a name="l2612"><span class="ln">2612 </span></a>                </span><span class="s1">if </span><span class="s0">(baseLocationTerm != </span><span class="s1">null</span><span class="s0">) { 
+<a name="l2613"><span class="ln">2613 </span></a>                    Geography geography = buildBaseLocationGeography(site, locale, baseLocationTerm, multiGBS); 
+<a name="l2614"><span class="ln">2614 </span></a>                    hit.setGeography(geography); 
+<a name="l2615"><span class="ln">2615 </span></a>                } 
+<a name="l2616"><span class="ln">2616 </span></a>            } 
+<a name="l2617"><span class="ln">2617 </span></a>        } 
+<a name="l2618"><span class="ln">2618 </span></a>    }</span></pre>
+</body>
+</html>
